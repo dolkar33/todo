@@ -22,7 +22,7 @@ export default function Login() {
         setSuccess("Login Successful!");
         localStorage.setItem("loggedInUser", JSON.stringify(user));
         setTimeout(() => {
-          window.location.href = "/dashboard";
+          window.location.href = "/components/dashboard";
         }, 1000);
       } else {
         setError("Invalid email or password. Please try again.");
@@ -65,7 +65,7 @@ export default function Login() {
           <h1 className="text-lg max-w-xs">
             Create an account and start your journey with us.
           </h1>
-          <a href="/signup">
+          <a href="/components/signup">
             <button className="border-white border-2 rounded-full px-8 py-3 cursor-pointer hover:bg-white hover:text-[#7776BC] transition">
               SIGN UP
             </button>

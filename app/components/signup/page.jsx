@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
+import { register } from "./api/api";
+import { useRouter } from "next/navigation";
 
 export default function Signup() {
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -10,65 +11,30 @@ export default function Signup() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const router = useRouter();
+
   const handleSubmit = async () => {
     setLoading(true);
     setError("");
 
-    setTimeout(() => {
-      if (!name.trim() || !email.trim() || !password.trim()) {
-        setError("All fields are required.");
-        setLoading(false);
-        return;
-      }
-      if (password !== confirmPassword) {
-        setError("Passwords do not match!");
-        setLoading(false);
-        return;
-      }
-      const existingUsers = JSON.parse(localStorage.getItem("users") || "[]");
-      const userExists = existingUsers.find((user) => user.email === email);
+    try {
+      const response = await register({ email, password });
 
-      if (userExists) {
-        setError("User with this email already exists.");
-        setLoading(false);
-        return;
+      const data = response.data;
+      if (response.status === 200) {
+        setSuccess("Signup Successful!");
+        console.log("User registered:", data);
+        router.push("/components/login");
+      } else {
+        setError(data.message || "Signup failed. Please try again.");
       }
-
-      const newUser = { name, email, password };
-      existingUsers.push(newUser);
-      localStorage.setItem("users", JSON.stringify(existingUsers));
-      setSuccess("Signup Successful!");
-
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 1000);
+    } catch (error) {
+      console.error("An unexpected error occurred:", error);
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
-
-  //   try {
-  //     const response = await fetch("api/Signup", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ name, email, password }),
-  //     });
-
-  //     const data = await response.json();
-  //     if (response.ok) {
-  //       setSuccess("Signup Successful!");
-  //       console.log("User registered:", data);
-  //     } else {
-  //       setError(data.message || "Signup failed. Please try again.");
-  //     }
-  //   } catch (error) {
-  //     console.error("An unexpected error occurred:", error);
-  //     setError("An unexpected error occurred. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   return (
     <div className="min-h-screen flex">
@@ -89,26 +55,7 @@ export default function Signup() {
           )}
           <div className="space-y-6">
             <div className="relative">
-              <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none z-10">
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <input
-                type="text"
-                placeholder="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full bg-gray-100 pl-12 pr-4 py-4 rounded-lg focus:outline-none relative z-0 text-gray-900 placeholder-gray-500"
-              />
+              <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none z-10"></div>
             </div>
             <div className="relative">
               <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none z-10">
@@ -194,7 +141,7 @@ export default function Signup() {
           <h1 className="text-lg max-w-xs">
             Login to continue your journey with us.
           </h1>
-          <a href="/login">
+          <a href="/components/login">
             <button className="border-white border-2 rounded-full px-8 py-3 cursor-pointer hover:bg-white hover:text-[#7776BC] transition">
               LOGIN
             </button>

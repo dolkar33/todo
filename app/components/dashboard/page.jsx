@@ -1,10 +1,10 @@
 "use client";
 
-import Header from "../components/Header";
-import Sidebar from "../components/Sidebar";
-import TaskList from "../components/TaskList";
-import TaskForm from "../components/TaskForm";
 import { useState } from "react";
+import Sidebar from "../Sidebar";
+import Header from "../Header";
+import TaskList from "../TaskList";
+import TaskForm from "../TaskForm";
 
 export default function Dashboard() {
   const [todos, setTodos] = useState([]);

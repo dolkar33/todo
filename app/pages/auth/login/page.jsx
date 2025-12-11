@@ -1,72 +1,53 @@
 "use client";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser } from "./store/loginThunk";
 
 export default function Login() {
+  const dispatch = useDispatch();
+  const userDetail = useSelector((state) => state.auth.user);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const router = useRouter();
+  useEffect(() => console.log(userDetail), [userDetail]);
   const handleSubmit = async () => {
     setLoading(true);
     setError("");
 
-    setTimeout(() => {
-      const existingUsers = JSON.parse(localStorage.getItem("users") || "[]");
-      const user = existingUsers.find(
-        (user) => user.email === email && user.password === password
-      );
-
-      if (user) {
+    try {
+      const response = await dispatch(loginUser({ email, password }));
+      if (response.meta.requestStatus === "fulfilled") {
         setSuccess("Login Successful!");
-        localStorage.setItem("loggedInUser", JSON.stringify(user));
-        setTimeout(() => {
-          window.location.href = "/components/dashboard";
-        }, 1000);
+        router.push("/pages/dashboard");
       } else {
-        setError("Invalid email or password. Please try again.");
+        setError(response.payload || "Login failed. Please try again.");
       }
+    } catch (error) {
+      console.error("An unexpected error occurred:", error);
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
-  //   try {
-  //     const response = await fetch("api/Login", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({ email, password }),
-  //     });
-
-  //     const data = await response.json();
-  //     if (response.ok) {
-  //       setSuccess("Login Successful!");
-  //       console.log("User logged in:", data);
-  //     } else {
-  //       setError(data.message || "Login failed. Please try again.");
-  //     }
-  //   } catch (error) {
-  //     console.error("An unexpected error occurred:", error);
-  //     setError("An unexpected error occurred. Please try again.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   return (
     <div className="min-h-screen flex">
-      <div className="w-1/3 bg-[#7776BC] flex justify-center flex-col items-center px-12 text-white">
+      <div className="w-1/3 bg-accent flex justify-center flex-col items-center px-12 text-white">
         <div className="text-center space-y-6 flex flex-col items-center">
           <div className="text-center">
-            <div className="text-5xl font-bold text-center">Hello,</div>
+            <div className="text-5xl font-bold text-center ">Hello,</div>
             <div className="text-5xl font-bold text-center">Welcome!</div>
           </div>
-          <h1 className="text-lg max-w-xs">
+          <h1 className="text-lg max-w-xs ">
             Create an account and start your journey with us.
           </h1>
-          <a href="/components/signup">
-            <button className="border-white border-2 rounded-full px-8 py-3 cursor-pointer hover:bg-white hover:text-[#7776BC] transition">
+          <a href="/pages/auth/signup">
+            <button className="border-white border-2 rounded-full px-8 py-3 cursor-pointer hover:bg-white hover:text-accent transition">
               SIGN UP
             </button>
           </a>
@@ -74,7 +55,7 @@ export default function Login() {
       </div>
       <div className="w-2/3 flex justify-center items-center px-12 bg-white">
         <div className="w-full max-w-sm">
-          <h2 className="font-bold text-[#7776bc] text-4xl mb-6 text-center">
+          <h2 className="font-bold text-accent text-4xl mb-6 text-center ">
             Login
           </h2>
           {error && (
@@ -133,7 +114,7 @@ export default function Login() {
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="rounded-full px-8 py-3 items-center bg-[#7776BC] text-white cursor-pointer hover:bg-[#9c9adf] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-full px-8 py-3 items-center bg-accent text-white cursor-pointer hover:bg-[#9c9adf] transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Loading..." : "Login"}
               </button>

@@ -1,9 +1,12 @@
 "use client";
-import { useState } from "react";
-import { register } from "./api/api";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { registerUser } from "./store/signupThunk";
+import { useDispatch, useSelector } from "react-redux";
 
 export default function Signup() {
+  const dispatch = useDispatch();
+  const userDetail = useSelector((state) => state.auth.user);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -12,21 +15,19 @@ export default function Signup() {
   const [success, setSuccess] = useState("");
 
   const router = useRouter();
-
+  useEffect(() => console.log(userDetail), [userDetail]);
   const handleSubmit = async () => {
     setLoading(true);
     setError("");
 
     try {
-      const response = await register({ email, password });
+      const response = await dispatch(registerUser({ email, password }));
 
-      const data = response.data;
-      if (response.status === 200) {
+      if (response.meta.requestStatus === "fulfilled") {
         setSuccess("Signup Successful!");
-        console.log("User registered:", data);
-        router.push("/components/login");
+        router.push("/pages/auth/login");
       } else {
-        setError(data.message || "Signup failed. Please try again.");
+        setError(response.payload || "Signup failed. Please try again.");
       }
     } catch (error) {
       console.error("An unexpected error occurred:", error);
@@ -40,7 +41,7 @@ export default function Signup() {
     <div className="min-h-screen flex">
       <div className="w-2/3 flex justify-center items-center px-12 bg-white">
         <div className="w-full max-w-md px-8">
-          <h2 className="font-bold text-[#7776bc] text-5xl mb-8 text-center">
+          <h2 className="font-bold text-accent text-5xl mb-8 text-center">
             Sign Up
           </h2>
           {error && (
@@ -124,7 +125,7 @@ export default function Signup() {
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="rounded-full px-8 py-3 items-center bg-[#7776BC] text-white cursor-pointer hover:bg-[#9c9adf] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-full px-8 py-3 items-center bg-accent text-white cursor-pointer hover:bg-[#9c9adf] transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? "Loading..." : "Sign Up"}
               </button>
@@ -132,7 +133,7 @@ export default function Signup() {
           </div>
         </div>
       </div>
-      <div className="w-1/3 bg-[#7776BC] flex justify-center flex-col items-center px-12 text-white">
+      <div className="w-1/3 bg-accent flex justify-center flex-col items-center px-12 text-white">
         <div className="text-center space-y-6 flex flex-col items-center">
           <div className="text-center">
             <div className="text-5xl font-bold text-center">Already have</div>
@@ -141,8 +142,8 @@ export default function Signup() {
           <h1 className="text-lg max-w-xs">
             Login to continue your journey with us.
           </h1>
-          <a href="/components/login">
-            <button className="border-white border-2 rounded-full px-8 py-3 cursor-pointer hover:bg-white hover:text-[#7776BC] transition">
+          <a href="/pages/auth/login">
+            <button className="border-white border-2 rounded-full px-8 py-3 cursor-pointer hover:bg-white hover:text-accent transition">
               LOGIN
             </button>
           </a>

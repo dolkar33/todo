@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { loginUser } from "./loginThunk";
 
-const authSlice = createSlice({
+const loginSlice = createSlice({
   name: "auth",
   initialState: {
     user: null,
@@ -18,8 +18,28 @@ const authSlice = createSlice({
       })
 
       .addCase(loginUser.fulfilled, (state, action) => {
+        console.log("=== REDUCER FULFILLED ===");
+        console.log("Action Payload:", action.payload);
+        console.log("Token from payload:", action.payload.token);
+        console.log("User from payload:", action.payload.user);
+
         state.loading = false;
-        state.user = action.payload;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+
+        if (typeof window !== "undefined" && action.payload.token) {
+          console.log("Saving token to localStorage:", action.payload.token);
+          localStorage.setItem("token", action.payload.token);
+
+          const savedToken = localStorage.getItem("token");
+          console.log("Token retrieved from localStorage:", savedToken);
+        } else {
+          console.log(
+            "NOT saving token. Window defined?",
+            typeof window !== "undefined"
+          );
+          console.log("Token exists?", !!action.payload.token);
+        }
       })
 
       .addCase(loginUser.rejected, (state, action) => {
@@ -29,4 +49,4 @@ const authSlice = createSlice({
   },
 });
 
-export default authSlice.reducer;
+export default loginSlice.reducer;

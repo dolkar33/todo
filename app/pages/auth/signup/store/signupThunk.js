@@ -11,8 +11,11 @@ export const registerUser = createAsyncThunk(
         return rejectWithValue(res || "Registration failed");
       }
 
-      return res.data;
+      const result = res.data.data;
+      console.log("Returning to Redux:", result);
+      return result;
     } catch (err) {
+      console.error("Thunk Error:", err);
       return rejectWithValue(err.message);
     }
   }
